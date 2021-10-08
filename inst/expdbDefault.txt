@@ -1,0 +1,118 @@
+CREATE TABLE [expdb_apsoil] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [soilid] CHAR(255) NOT NULL ON CONFLICT FAIL,   [country] CHAR,   [site] CHAR,   [region] CHAR,   [soiltype] CHAR,   [nearesttown] CHAR,   [naturalvegetation] CHAR,   [state] CHAR,   [apsoilnumber] INTEGER,   [latitude] FLOAT,   [longitude] FLOAT,   [locationaccuracy] CHAR,   [datasource] CHAR,   [winterdate] CHAR,   [summerdate] CHAR);
+
+CREATE UNIQUE INDEX [index_name] ON [expdb_apsoil] ([soilid]);
+
+
+CREATE TABLE [expdb_apsoil_data] (  [soil_id] INTEGER NOT NULL ON CONFLICT FAIL,   [trait_id] INTEGER NOT NULL ON CONFLICT FAIL,   [value] FLOAT NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([soil_id], [trait_id]) ON CONFLICT REPLACE);
+
+
+CREATE TABLE [expdb_apsoil_layer] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [soil_id] INTEGER NOT NULL ON CONFLICT FAIL,   [from_depth] FLOAT NOT NULL ON CONFLICT FAIL,   [to_depth] FLOAT NOT NULL ON CONFLICT FAIL);
+
+CREATE UNIQUE INDEX [index_soil_layer] ON [expdb_apsoil_layer] ([from_depth], [to_depth], [soil_id]);
+
+
+CREATE TABLE [expdb_apsoil_layer_data] (  [layer_id] INTEGER NOT NULL ON CONFLICT FAIL,   [trait_id] INTEGER NOT NULL ON CONFLICT FAIL,   [value] FLOAT NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([layer_id], [trait_id]) ON CONFLICT REPLACE);
+
+
+CREATE TABLE [expdb_fertilization] (  [trial_id] INTEGER NOT NULL ON CONFLICT FAIL,   [fertilizer] INTEGER NOT NULL ON CONFLICT FAIL,   [date] DATE NOT NULL ON CONFLICT FAIL,   [amount] FLOAT NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([trial_id], [fertilizer], [date]) ON CONFLICT REPLACE);
+
+
+CREATE TABLE [expdb_gene] (  [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,   [name] CHAR(255) NOT NULL);
+
+
+CREATE TABLE [expdb_gene_allele] (  [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,   [gene_id] INTEGER NOT NULL,   [name] CHAR(255) NOT NULL,   [description] CHAR(255));
+
+
+CREATE TABLE [expdb_genotype] (
+  [id] INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY ON CONFLICT IGNORE AUTOINCREMENT, 
+  [name] VARCHAR(256) NOT NULL ON CONFLICT IGNORE, 
+  [breedingline] CHAR, 
+  [alias] CHAR(255), 
+  [crop] CHAR NOT NULL ON CONFLICT FAIL DEFAULT wheat, 
+  [owner] CHAR, 
+  [releasse] INTEGER, 
+  [maturity] CHAR, 
+  [notes] CHAR(255));
+
+CREATE UNIQUE INDEX [name] ON [expdb_genotype] ([name]);
+
+
+CREATE TABLE [expdb_genotype_gene] (  [genotype_id] INTEGER NOT NULL,   [allele_id] INTEGER NOT NULL,   CONSTRAINT [] PRIMARY KEY ([genotype_id], [allele_id]));
+
+
+CREATE TABLE [expdb_irrigation] (  [trial_id] INTEGER NOT NULL ON CONFLICT FAIL,   [date] DATE NOT NULL ON CONFLICT FAIL,   [amount] FLOAT NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([trial_id], [date]) ON CONFLICT REPLACE);
+
+
+CREATE TABLE [expdb_log] (  [date] DATE NOT NULL ON CONFLICT FAIL,   [comments] VARCHAR NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([date], [comments]) ON CONFLICT IGNORE);
+
+
+CREATE TABLE [expdb_met] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL,   [name] CHAR NOT NULL ON CONFLICT FAIL,   [number] CHAR,   [type] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [latitude] FLOAT,   [longitude] FLOAT,   [file_id] INTEGER,   [notes] VARCHAR);
+
+CREATE UNIQUE INDEX [idx_name] ON [expdb_met] ([name]);
+
+
+CREATE TABLE [expdb_met_file] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [name] CHAR(255) NOT NULL ON CONFLICT FAIL,   [type] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [num] INTEGER);
+
+CREATE UNIQUE INDEX [idx_met_file_name] ON [expdb_met_file] ([name]);
+
+
+CREATE TABLE "expdb_node" (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [name] CHAR NOT NULL ON CONFLICT FAIL);
+
+CREATE UNIQUE INDEX [node_name] ON "expdb_node" ([name]);
+
+
+CREATE TABLE [expdb_node_heritage] (  [node_id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL,   [parent_node_id] INTEGER NOT NULL ON CONFLICT FAIL);
+
+CREATE UNIQUE INDEX [node_heritage] ON [expdb_node_heritage] ([node_id], [parent_node_id]);
+
+
+CREATE TABLE [expdb_phenotype] (  [plot_id] INTEGER NOT NULL ON CONFLICT FAIL,   [trait_id] INTEGER NOT NULL ON CONFLICT FAIL,   [node_id] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT Plant,   [sample] INTEGER NOT NULL ON CONFLICT FAIL,   [date] DATE NOT NULL ON CONFLICT FAIL,   [value] FLOAT NOT NULL,   [quality] INT DEFAULT 0,   CONSTRAINT [sqlite_autoindex_expdb_phenotype_1] PRIMARY KEY ([plot_id], [trait_id], [node_id], [sample], [date]) ON CONFLICT REPLACE);
+
+
+CREATE TABLE [expdb_researcher] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY AUTOINCREMENT,   [name] CHAR(255) NOT NULL ON CONFLICT FAIL,   [email] CHAR,   [notes] VARCHAR(3000));
+
+CREATE UNIQUE INDEX [owner_name] ON [expdb_researcher] ([name]);
+
+
+CREATE TABLE [expdb_site] (  [id] INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY ON CONFLICT IGNORE AUTOINCREMENT,   [name] CHAR(255) NOT NULL ON CONFLICT IGNORE,   [country] CHAR(255),   [latitude] FLOAT,   [longitude] FLOAT,   [elevation] FLOAT,   [soil_id] INTEGER,   [notes] VARCHAR);
+
+CREATE UNIQUE INDEX [site_name] ON [expdb_site] ([name]);
+
+
+CREATE TABLE [expdb_source] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [name] CHAR NOT NULL ON CONFLICT FAIL,   [label] CHAR,   [notes] VARCHAR);
+
+CREATE UNIQUE INDEX [idx_source_name] ON [expdb_source] ([name]);
+
+
+CREATE TABLE [expdb_trait] (
+  [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+  [name] CHAR(255) NOT NULL, 
+  [type] CHAR NOT NULL ON CONFLICT FAIL DEFAULT crop, 
+  [level] CHAR NOT NULL ON CONFLICT FAIL DEFAULT field, 
+  [measurement] CHAR, 
+  [measurementindex] INTEGER, 
+  [label] CHAR(255), 
+  [unit] CHAR(255), 
+  [description] VARCHAR(5000));
+
+CREATE UNIQUE INDEX [trait_name] ON [expdb_trait] ([name]);
+
+
+CREATE TABLE [expdb_trial] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT IGNORE AUTOINCREMENT,   [name] CHAR(255) NOT NULL ON CONFLICT FAIL,   [year] INTEGER,   [researcher_id] INTEGER(255),   [source_id] INTEGER,   [site_id] INTEGER,   [sowing] DATE NOT NULL ON CONFLICT FAIL,   [depth] floAT DEFAULT 50,   [density] floaT DEFAULT 100,   [row_spacing] FLOAT DEFAULT 250,   [met_id] INTEGER,   [notes] VARCHAR);
+
+CREATE UNIQUE INDEX [t_name] ON [expdb_trial] ([name]);
+
+
+CREATE TABLE [expdb_trial_design] (  [id] INTEGER NOT NULL ON CONFLICT FAIL PRIMARY KEY ON CONFLICT FAIL AUTOINCREMENT,   [name] CHAR(32),   [year] INTEGER NOT NULL ON CONFLICT FAIL,   [site_id] INTEGER NOT NULL ON CONFLICT FAIL,   [trial_id] INTEGER NOT NULL ON CONFLICT FAIL,   [column] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [row] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [replicate] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [treatment] INTEGER NOT NULL ON CONFLICT FAIL DEFAULT 1,   [block] INTEGER DEFAULT 1,   [genotype_id] INTEGER NOT NULL ON CONFLICT FAIL);
+
+CREATE UNIQUE INDEX [index_plotid] ON [expdb_trial_design] ([name]);
+
+CREATE UNIQUE INDEX [index_plot] ON [expdb_trial_design] ([year], [site_id], [column], [row]);
+
+
+CREATE TABLE [expdb_trial_design_extra] (  [plot_id] INTEGER NOT NULL ON CONFLICT FAIL,   [name] CHAR(255) NOT NULL ON CONFLICT FAIL,   [value] CHAR(255) NOT NULL ON CONFLICT FAIL,   CONSTRAINT [] PRIMARY KEY ([plot_id], [name]) ON CONFLICT IGNORE);
+
+
+CREATE TABLE [expdb_trial_soil] (  [trial_id] INTEGER NOT NULL ON CONFLICT FAIL,   [from_depth] FLOAT NOT NULL,   [to_depth] FLOAT NOT NULL,   [no3] float DEFAULT 0,   [nh4] FLOAT DEFAULT 0,   CONSTRAINT [] PRIMARY KEY ([trial_id], [from_depth], [to_depth]) ON CONFLICT REPLACE);
+
+

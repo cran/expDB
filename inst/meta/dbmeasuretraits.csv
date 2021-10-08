@@ -1,0 +1,9 @@
+MeasurementIndex,Name,Unit,Notes
+1,DryWeightGreenLeaf,g,
+2,DryWeightStem,g,
+3,DryWeightDeathLeaf,g,
+4,DryWeightHead,g,
+5,DryWeightLeafArea,g,Dry weight for subsmaple of leaf area
+6,DryWeightRest,g,Dry weight for rest sample
+7,HeadDevelopment,[],Samples for head development
+8,WSC,[],Samples for wsc
